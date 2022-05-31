@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leitein Text Finder</title>
+  </head>
+  <body>
+	  <div class="start" id="1">
+		  <textarea id="w3review1" name="w3review" rows="10" cols="200" placeholder="Hier den Text einfügen der durchsucht werden soll"></textarea>
+		  <textarea id="w3review2" name="w3review" rows="10" cols="200" placeholder="Hier die Wörter einfügen, von denen Anhäufungen gefunden werden sollen. Jdes Wort mit einem Komma abtrennen!"></textarea>
+          <button style="height: 100px; width: 200px; background-color: red; " onclick="search(); document.getElementById('2').style.transform = 'translate(0px, 0px)'; document.getElementById('1').style.transform = 'translate(0px, -100%)';">START</button>
+      </div>
+      <div class="search" id="2">
+          
+      </div>
+  </body>
+  <style>
+  @keyframes example {
+      0% {background-color: lightblue;}
+      50% {background-color: red;}
+      100% {background-color: lightblue;}
+  }
+  html, body {
+	  height: 100%;
+	  width: 100%;
+	  overflow:  hidden;
+	  background-color: lightblue;
+  }
+  .start {
+	  height: 100%;
+	  width: 100%;
+	  position: fixed;
+	  top: 0px;
+	  left: 0px;
+	  background-color: white;
+      transform: translate(0px, 0px);
+      transition: transform 2s;
+  }
+  .search {
+	  height: 100%;
+	  width: 100%;
+	  position: fixed;
+	  top: 0px;
+	  left: 0px;
+	  background-color: lightblue;
+	  animation-name: example;
+      animation-duration: 4s;
+      animation-iteration-count: infinite;
+      animation-direction: alternate;
+      transform: translate(0px, 100%);
+      transition: transform 2s;
+      font-size: 28px;
+      overflow: auto;
+  }
+  
+  </style>
+  <script>
+	  function sortArray(array) {
+  var temp = 0;
+  for (var i = 0; i < array.length; i++) {
+    for (var j = i; j < array.length; j++) {
+      if (array[j] < array[i]) {
+        temp = array[j];
+        array[j] = array[i];
+        array[i] = temp;
+      }
+    }
+  }
+  array.reverse();
+  return array;
+}
+	  function getIndicesOf(searchStr, str, caseSensitive) {
+	    var searchStrLen = searchStr.length;
+	    if (searchStrLen == 0) {
+	        return [];
+	    }
+	    var startIndex = 0, index, indices = [];
+	    if (!caseSensitive) {
+	        str = str.toLowerCase();
+	        searchStr = searchStr.toLowerCase();
+	    }
+	    while ((index = str.indexOf(searchStr, startIndex)) > -1) {
+	        indices.push(index);
+	        startIndex = index + searchStrLen;
+	    }
+	    return indices;
+	}
+
+      window.search = function(){
+		  alert("hallo");
+		  setTimeout(function(){
+			  document.getElementById("2").innerHTML += "Wörter werden gelistet..<br>";
+			  
+			  var text = document.getElementById("w3review1").value;
+			  var wörtertest = document.getElementById("w3review2").value;
+			  var wörter = [];
+			  
+			  wörtertest.split(",").forEach(function(w){
+				  wörter.push(w.trim());
+			  });
+			  
+			  setTimeout(function(){
+			      document.getElementById("2").innerHTML += "Wörterliste erstellt!<br>";
+			      setTimeout(function(){
+					  document.getElementById("2").innerHTML += "Text wird geladen..<br>";
+					  setTimeout(function(){
+					      document.getElementById("2").innerHTML += "Text erfolgreich in eine Variable geladen!<br>";
+					       setTimeout(function(){
+					          document.getElementById("2").innerHTML += "Suche kann beginnen..<br>";
+				           }, 300);
+				      }, 300);
+				  }, 500);
+			  }, 200);
+			  
+			  setTimeout(function(){
+				  var positions = [];
+				  wörter.forEach(function(w){
+					  document.getElementById("2").innerHTML = "Suchen nach "+w+"..<br>";
+					  const indexes = getIndicesOf(w, text);
+					  if(indexes.length == 0){
+						  document.getElementById("2").innerHTML += w+" WURDE NICHT IM TEXT GEFUNDEN!!!!!!!";
+					  } else {
+						  indexes.forEach(function(z){
+							  document.getElementById("2").innerHTML += w+" wurde an Position "+z+" gefunden!<br>";
+							  document.getElementById("2").scrollTo(0, document.getElementById("2").scrollHeight);
+						  });
+						  positions = positions.concat(indexes);
+					  }
+				  });
+				  positions = sortArray(positions);
+				  console.log(positions);
+				  alert(positions);
+				  document.getElementById("2").innerHTML = positions.toString();
+				  
+				  var anhäufungen = {};
+				  var zahlen = [];
+				  
+				  for(var i = 0; i < positions.length; i++){					  
+					  var ii = 1;
+					  var zähler = 0;
+					  while(positions[i+ii]-positions[i] < 65*8){
+						  ii++;
+						  zähler++;
+					  }
+					  ii = 1;
+					  while(positions[i]-positions[i-ii] < 65*8){
+						  ii++;
+						  zähler++;
+					  }
+					  if(zähler.toString() in anhäufungen){}else{
+						  anhäufungen[zähler.toString()] = [];
+				      }
+				      anhäufungen[zähler.toString()].push(positions[i]);
+				      zahlen.push(zähler);
+				      console.log(zähler);
+				  }
+				  console.log(zahlen);
+				  alert(zahlen);
+				  zahlen = sortArray(zahlen);
+				  alert(zahlen);
+				  document.getElementById("2").innerHTML = "Ergebnis:<br>";
+				  anhäufungen[zahlen[0].toString()].forEach(function(t){
+					  document.getElementById("2").innerHTML += zahlen[0].toString() + "Wörter wurden in einem Abschnitt gefunden:";
+					  text = text.substring(t-(65*8), t+(65*8));
+					  document.getElementById("2").innerHTML += "<textarea>"+text+"</textarea>";
+				  });
+			  }, 4000);
+			  
+	      }, 1500);
+		  
+	  }
+  </script>
+</html>
